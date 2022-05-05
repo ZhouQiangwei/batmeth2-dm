@@ -27,6 +27,30 @@ void outputRow(ofstream& ofs, string key, long v);
 void outputRow(ofstream& ofs, string key, string v);
 FILE* File_Open(const char* File_Name,const char* Mode);
 string my_to_string(long n);
+int strIcmp(const char* p1, const char* p2)
+{
+    while (*p1)
+    {
+        char c1 = *p1;
+        char c2 = *p2;
+        if (c1 >= 'A' && c1 <= 'Z')
+        {
+            c1 += 'a' - 'A';
+        }
+        if (c2 >= 'A' && c2 <= 'Z')
+        {
+            c2 += 'a' - 'A';
+        }
+        if (c1 != c2)
+        {
+            return c1 - c2;
+        }
+        p1++;
+        p2++;
+    }
+    return *p1 - *p2;
+}
+
 int main(int argc, char* argv[]){
 	const char* Help_String="Command Format :  report2html -p prefix \n"
 		"\nUsage:\n"
@@ -51,11 +75,11 @@ int main(int argc, char* argv[]){
 		}
     }
     htmlFile = prefix + "." + htmlFile;
-    enrichfile = prefix + ".Methylevel.txt";
-    distri_mrfile = prefix + ".AverMethylevel.txt";
-    heatmap_cg_file = prefix + ".GENE.cg.txt";
-    heatmap_chg_file = prefix + ".GENE.chg.txt";
-    heatmap_chh_file = prefix + ".GENE.chh.txt";
+    enrichfile = prefix + ".bodym";
+    distri_mrfile = prefix + ".profile.across.aver";
+    heatmap_cg_file = prefix + ".profile.across.cg";
+    heatmap_chg_file = prefix + ".profile.across.chg";
+    heatmap_chh_file = prefix + ".profile.across.chh";
     mrfile = prefix + ".mCcatero.txt";
     coverage_mrfile = prefix + ".NCcoverage.txt";
     chrom_mrfile = prefix + ".methBins.txt";
@@ -364,21 +388,21 @@ int main(int argc, char* argv[]){
     while(fgets(s2t, BATBUF, Chrom_MR)!=0){
         if(s2t == NULL) continue;
         sscanf(s2t, "%s%d%f%s", chrom, &chr_loci, &mr, context);
-        if(strcmp(context, "CG")==0){
+        if(strIcmp(context, "CG")==0){
             if(mr>0)  chrom_cg_p[chr_loci-1] = mr;
             else if(mr < 0) chrom_cg_n[chr_loci-1] = mr;
             else{
                 chrom_cg_p[chr_loci-1] = mr;
                 chrom_cg_n[chr_loci-1] = mr;
             }
-        }else if(strcmp(context, "CHG")==0){
+        }else if(strIcmp(context, "CHG")==0){
             if(mr>0)  chrom_chg_p[chr_loci-1] = mr;
             else if(mr < 0) chrom_chg_n[chr_loci-1] = mr;
             else{
                 chrom_chg_p[chr_loci-1] = mr;
                 chrom_chg_n[chr_loci-1] = mr;
             }
-        }else if(strcmp(context, "CHH")==0){
+        }else if(strIcmp(context, "CHH")==0){
             if(mr>0)  chrom_chh_p[chr_loci-1] = mr;
             else if(mr < 0) chrom_chh_n[chr_loci-1] = mr;
             else{
@@ -533,6 +557,10 @@ int main(int argc, char* argv[]){
             if(subarr[0]=='C') {
                 subarr = strtok(NULL,"\t");
                 continue;
+            }else if(subarr[0]=='n'){
+                cg_dis_mr[i][j_len] = 0;
+                subarr = strtok(NULL,"\t");
+                continue;
             }
             cg_dis_mr[i][j_len] = atof(subarr);
             
@@ -548,9 +576,17 @@ int main(int argc, char* argv[]){
     for(int i=0;i<j_len;i++){
         x_axis[i]=i+1;
     }
-    json_str += "var trace_distri_cg ={";
+    json_str += "var trace_distri_c ={";
     json_str += "x: [" + list2string_int(x_axis, j_len) +"],";
     json_str += "y: [" + list2string(cg_dis_mr[0], j_len) + "],";
+    json_str += "name: 'c',";
+    json_str += "mode:'lines',";
+    json_str += "marker: {color: 'gray'}";
+    json_str += "};\n";
+
+    json_str += "var trace_distri_cg ={";
+    json_str += "x: [" + list2string_int(x_axis, j_len) +"],";
+    json_str += "y: [" + list2string(cg_dis_mr[1], j_len) + "],";
     json_str += "name: 'cg',";
     json_str += "mode:'lines',";
     json_str += "marker: {color: '#1C86EE'}";
@@ -558,7 +594,7 @@ int main(int argc, char* argv[]){
 
     json_str += "var trace_distri_chg ={";
     json_str += "x: [" + list2string_int(x_axis, j_len) +"],";
-    json_str += "y: [" + list2string(cg_dis_mr[1], j_len) + "],";
+    json_str += "y: [" + list2string(cg_dis_mr[2], j_len) + "],";
     json_str += "name: 'chg',";
     json_str += "mode:'lines',";
     json_str += "marker: {color: '#FF4136'}";
@@ -566,13 +602,13 @@ int main(int argc, char* argv[]){
 
     json_str += "var trace_distri_chh ={";
     json_str += "x: [" + list2string_int(x_axis, j_len) +"],";
-    json_str += "y:[" + list2string(cg_dis_mr[2], j_len) + "],";
+    json_str += "y:[" + list2string(cg_dis_mr[3], j_len) + "],";
     json_str += "name: 'chh',";
     json_str += "mode:'lines',";
     json_str += "marker:{color:'#FF851B'}";
     json_str += "};\n";
 
-    json_str += "var data = [trace_distri_cg, trace_distri_chg, trace_distri_chh];\n";
+    json_str += "var data = [trace_distri_c, trace_distri_cg, trace_distri_chg, trace_distri_chh];\n";
     json_str += "var layout={yaxis: { title:'DNA Methylation level(%)'}, xaxis: {title: 'Function elements'} };\n";
 
     json_str += "Plotly.newPlot('plot_distri_mr', data, layout);\n";
@@ -827,36 +863,36 @@ int main(int argc, char* argv[]){
 
         sprintf( tp_str, "%0.2f", mr); //截取后转化为字符串类型
         sscanf( tp_str, "%f", &mr);
-        if(strcmp(context, "CG")==0){
-            if(strcmp(region, "UP")==0){
+        if(strIcmp(context, "CG")==0){
+            if(strIcmp(region, "UP")==0){
                 cg_up_mr[cg_1] = mr;
                 cg_1++;
-            }else if(strcmp(region, "BODY")==0){
+            }else if(strIcmp(region, "BODY")==0){
                 cg_body_mr[cg_2] = mr;
                 cg_2++;
-            }else if(strcmp(region, "DOWN")==0){
+            }else if(strIcmp(region, "DOWN")==0){
                 cg_down_mr[cg_3] = mr;
                 cg_3++;
             }
-        }else if(strcmp(context, "CHG")==0){
-            if(strcmp(region, "UP")==0){
+        }else if(strIcmp(context, "CHG")==0){
+            if(strIcmp(region, "UP")==0){
                 chg_up_mr[chg_1] = mr;
                 chg_1++;
-            }else if(strcmp(region, "BODY")==0){
+            }else if(strIcmp(region, "BODY")==0){
                 chg_body_mr[chg_2] = mr;
                 chg_2++;
-            }else if(strcmp(region, "DOWN")==0){
+            }else if(strIcmp(region, "DOWN")==0){
                 chg_down_mr[chg_3] = mr;
                 chg_3++;
             }
-        }else if(strcmp(context, "CHH")==0){
-            if(strcmp(region, "UP")==0){
+        }else if(strIcmp(context, "CHH")==0){
+            if(strIcmp(region, "UP")==0){
                 chh_up_mr[chh_1] = mr;
                 chh_1++;
-            }else if(strcmp(region, "BODY")==0){
+            }else if(strIcmp(region, "BODY")==0){
                 chh_body_mr[chh_2] = mr;
                 chh_2++;
-            }else if(strcmp(region, "DOWN")==0){
+            }else if(strIcmp(region, "DOWN")==0){
                 chh_down_mr[chh_3] = mr;
                 chh_3++;
             }

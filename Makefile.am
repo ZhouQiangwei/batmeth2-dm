@@ -4,6 +4,7 @@ script:
 	g++ $(CXXFLAGS) ./scripts/report2html.cpp -o ./scripts/report2html 
 myinstall:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
+	cd src/bmtools && make install
 	cp scripts/batmeth2_to_bigwig.py bin
 	cp scripts/bedGraphToBigWig bin
 	cp scripts/bedSort bin
@@ -42,13 +43,14 @@ myinstall:
 	cp scripts/BatMeth2 bin
 	cp scripts/build_ann_location.pl bin
 	cp scripts/preGenome bin
-	cp src/batDMR/batDMR ./bin
 	cp src/genome2cg bin
 	cp src/genomebinLen bin
 	cp src/memalign bin
 	cp src/build_index_rrbs bin
 	cp src/mealign/bwame bin
 	cp src/build_index_rrbs bin
+	cp src/bmtools/bmtools bin
+	cp src/bmtools/bmDMR bin
 copy:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
 	g++ -o ./scripts/BatMeth2 ./scripts/BatMeth2.cpp -lpthread
@@ -89,10 +91,11 @@ copy:
 	cp scripts/BatMeth2 bin
 	cp scripts/build_ann_location.pl bin
 	cp scripts/preGenome bin
-	cp src/batDMR/batDMR ./bin
 	cp src/genome2cg bin
 	cp src/genomebinLen bin
 	cp src/memalign bin
 	cp src/build_index_rrbs bin
 	cp src/mealign/bwame bin
 	cp src/build_index_rrbs bin
+	cp src/bmtools/bmtools bin
+	cp src/bmtools/bmDMR bin

@@ -188,7 +188,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src/mealign src/samtools-0.1.18 src scripts src/batDMR
+SUBDIRS = src/bmtools src/mealign src/samtools-0.1.18 src scripts
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -678,6 +678,7 @@ script:
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html 
 myinstall:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
+	cd src/bmtools && make install
 	cp scripts/batmeth2_to_bigwig.py bin
 	cp scripts/bedGraphToBigWig bin
 	cp scripts/bedSort bin
@@ -709,13 +710,14 @@ myinstall:
 	cp scripts/BatMeth2 bin
 	cp scripts/build_ann_location.pl bin
 	cp scripts/preGenome bin
-	cp src/batDMR/batDMR ./bin
 	cp src/genome2cg bin
 	cp src/genomebinLen bin
 	cp src/memalign bin
 	cp src/build_index_rrbs bin
 	cp src/mealign/bwame bin
 	cp src/build_index_rrbs bin
+	cp src/bmtools/bmtools bin
+	cp src/bmtools/bmDMR bin
 copy:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
 	cp scripts/batmeth2_to_bigwig.py bin
@@ -749,13 +751,14 @@ copy:
 	cp scripts/BatMeth2 bin
 	cp scripts/build_ann_location.pl bin
 	cp scripts/preGenome bin
-	cp src/batDMR/batDMR ./bin
 	cp src/genome2cg bin
 	cp src/genomebinLen bin
 	cp src/memalign bin
 	cp src/build_index_rrbs bin
 	cp src/mealign/bwame bin
 	cp src/build_index_rrbs bin
+	cp src/bmtools/bmtools bin
+	cp src/bmtools/bmDMR bin
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -43,9 +43,10 @@ operator>> (std::istream &is, Design &design) {
 
     vector<double> matrix_row;
     while (row_is >> token) {
-      if (token.length() == 1 && (token == "0" || token == "1"))
+      if (token.length() == 1 && (token == "0" || token == "1")) {
         matrix_row.push_back(token == "1");
-      else
+        fprintf(stderr, "%f\n", matrix_row.back());
+      } else
         throw DNAmethException("only binary factor levels are allowed:\n"
                                 + row);
     }

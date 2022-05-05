@@ -9,6 +9,8 @@ plot line and dash
 This is a script for profile across the TSS/TES
 """
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -166,7 +168,7 @@ def getArgs(args=None):
                         #nargs='+',
                         help='y-axis label')
     parser.add_argument( '-t', '--title',
-                        default=["CG meth", "CHG meth", "CHH meth", "C meth"],
+                        default=["C meth", "CG meth", "CHG meth", "CHH meth"],
                         help='Title of the plot, to be printed on top of '
                         'the generated image. Leave blank for no title.',
                         nargs='+')

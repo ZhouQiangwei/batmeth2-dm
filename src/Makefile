@@ -31,6 +31,8 @@ OPTFLAGS = -O2
 DEBUGFLAGS = -g
 CXXFLAGS =
 
+PWD := $(shell pwd)
+
 ifdef DEBUG
 CXXFLAGS += $(DEBUGFLAGS)
 endif
@@ -71,7 +73,7 @@ MOMO:
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o genomebinLen genomebinLen.cpp $(INCLUDEARGS) $(LIBS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o memalign memalign.cpp $(INCLUDEARGS) -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lpthread $(LIBS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o build_index_rrbs build_index_rrbs.cpp $(INCLUDEARGS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) calmeth.cpp -o calmeth -m64 -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) calmeth.cpp -o calmeth -m64 -I./bmtools/ -L./bmtools/ -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lBigWig -Wl,-rpath $(PWD)/bmtools
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) splitSam.cpp -o splitSam -m64 -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -pthread $(INCLUDEARGS) $(LIBS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o methyGff methyGff.cpp $(INCLUDEARGS) $(LIBS)
 

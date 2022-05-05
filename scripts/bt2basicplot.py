@@ -42,6 +42,9 @@ def getArgs(args=None):
     parser.add_argument("-l", "--label", default='wildtype', 
                         help="Labels of samples, sperate by space. eg. -l CG CHG", 
                         nargs='+')
+    parser.add_argument("--chr_select", default='chr1', 
+                        help="chromosome selected for boxplot and hexsin, default chr1. all means used all.", 
+                        )
     ## coverfile
     parser.add_argument("-c", "--coverfile", 
                         default='', 
@@ -157,22 +160,25 @@ marker
 '|'	vline marker
 '_'	hline marker
 '''
-
-def plotline(NCcovergae, outfilename, mydpi, image_format):
+legendsize=10
+def plotline(NCcovergae, outfilename, mydpi, image_format, legend, label):
     #x = np.linspace(0, 10, 500)
     #y = np.sin(x)
     x = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     #y = list(map(eval, NCcovergae[0]))
     #fig, ax = plt.subplots()
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
+    figextend = 0
+    if legend == 11:
+        figextend = 2
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(9+figextend, 4))
 
     colors= ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
     linstyle = ['-', '--', '-.', ':']
     #marker = ['']
     for idx in range(0, len(NCcovergae), 2):
-        print(idx)
+        print(int(idx/2))
         y = list(map(eval, NCcovergae[idx]))
-        ax[0].plot(x, y, color=colors[int(idx/2)] ,marker='o', linestyle='dashed',
+        ax[0].plot(x, y, color=colors[int(idx/2)] ,marker='o', linestyle='dashed', label=label[int(idx/2)],
           linewidth=1, markersize=3)
     ax[0].set_title("The number of C meet coverage > x[idx]")
     ax[0].set_xlabel("Coverage")
@@ -181,11 +187,15 @@ def plotline(NCcovergae, outfilename, mydpi, image_format):
     # Using plot(..., dashes=...) to set the dashing when creating a line
     for idx in range(1, len(NCcovergae), 2):
         y = list(map(eval, NCcovergae[idx]))
-        ax[1].plot(x, y, dashes=[6, 2]) #, label='Coverage percent'
+        ax[1].plot(x, y, dashes=[6, 2]) #, label='Coverage percent' 
     ax[1].set_title("Coverage percent")
     ax[1].set_xlabel("Coverage")
     ax[1].set_ylabel("Percent")
-
+    if legend < 11:
+        plt.legend(loc=legend, prop={'size': legendsize}, frameon=False, labels=label)
+    elif legend == 11:
+        plt.legend(bbox_to_anchor=(1.01, 0.05), loc=3, borderaxespad=0, prop={'size': legendsize}, frameon=False, labels=label)
+    
     #ax[0].legend()
     #ax[1].legend()
     plt.savefig(outfilename, dpi=mydpi, format=image_format)
@@ -197,7 +207,7 @@ def readmethfile(methlevel, methleveldf, filename, context, chr_choice):
         for line in mdata:
             data = line.split()
             chrom, pos, strand, mC, cover, lineID = data
-            if chrom != chr_choice:
+            if chr_choice != 'all' and chrom != chr_choice:
                 continue
             mr = int(mC)/int(cover)
             methlevel.setdefault(context,[]).append(float(mr))
@@ -623,6 +633,12 @@ if __name__ == '__main__':
         outfileprefix = outfileprefix + "." + filesplit[i]
     if image_format == '':
         image_format = filesplit[-1]
+    legend=args.legend #是否plot标注
+    figextend = 0
+    if legend == 11:
+        figextend = 1
+    #lastlegend = args.lastlegend
+    label=args.label
     
     if args.mrfile=='' and args.coverfile == '':
         print("should predifined input mr files!")
@@ -636,7 +652,7 @@ if __name__ == '__main__':
             readcoverfile(cfile, NCcovergae)
         
         outfilename = outfileprefix + ".cover." + image_format
-        plotline(NCcovergae, outfilename, mydpi, image_format)
+        plotline(NCcovergae, outfilename, mydpi, image_format, legend, label)
 
     if args.mrfile == '':
         exit()
@@ -644,9 +660,10 @@ if __name__ == '__main__':
     methleveldf = {}
     mefiles = args.mrfile
     Nmrfile = len(mefiles)
+    chr_select = args.chr_select
     for mefile in mefiles:
-        readmethfile(methlevel, methleveldf, mefile, mefile, "Chr1")
-    
+        readmethfile(methlevel, methleveldf, mefile, mefile, chr_select)
+    print(chr_select, methlevel)
     colors = sample(all_colors, Nmrfile)
     print(colors)
     notch = False
@@ -673,6 +690,7 @@ if __name__ == '__main__':
     #plotviolionsns(methlevel, "context", "meth", 'v')
     outfilename = outfileprefix + ".boxp." + image_format
     fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
+    print(methlevel)
     plotboxplot(fig, axs[0], methlevel, methleveldf, notch, vert, showbox, showfliers, showmeans, showmedians, boxprops, medianprops,
               meanprops, capprops, whiskerprops, fontsize)
     
