@@ -6,7 +6,7 @@ This is a README file for the usage of Batmeth2.
 
 BatMeth2 tutotial: https://batmeth2-mbw.readthedocs.io
 
-Starting from this version, because the matching problem needs to be modified for a long time, we replaced the matching part written by ourselves with MEM matching, and added some Python visualization functions. At present, some functions are being added.
+We privide a binary indexed mbw format, simalar to BigWig but with coverage and context information, for view and calculate DNA methylation level quickly. This file also can be used as BigWig file for genome browser visulization. Besides, mbw format file is smaller size than text format. Also, we provide a tool called bmtools for view and process mbw file. And bmDMR tool for detect DMC and DMR more faster based on mbw input files. for more information plase view https://batmeth2-mbw.readthedocs.io/en/latest/function/BMtools.html
 
 REQUIREMENTS
 -------
