@@ -5,9 +5,6 @@ script:
 myinstall:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
 	cd src/bmtools && make install
-	cp scripts/batmeth2_to_bigwig.py bin
-	cp scripts/bedGraphToBigWig bin
-	cp scripts/bedSort bin
 	g++ -o ./scripts/BatMeth2 ./scripts/BatMeth2.cpp -lpthread
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html
 	cp ./scripts/BatMeth2 ./bin/batmeth2
@@ -56,9 +53,6 @@ copy:
 	g++ -o ./scripts/BatMeth2 ./scripts/BatMeth2.cpp -lpthread
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html
 	cp ./scripts/BatMeth2 ./bin/batmeth2
-	cp scripts/batmeth2_to_bigwig.py bin
-	cp scripts/bedGraphToBigWig bin
-	cp scripts/bedSort bin
 	cp scripts/strip.pl bin 
 	cp scripts/report2html bin
 	cp scripts/b2c.pl bin 
