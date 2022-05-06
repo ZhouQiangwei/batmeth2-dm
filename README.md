@@ -4,7 +4,7 @@ BatMeth2: An Integrated Package for Bisulfite DNA Methylation Data Analysis with
 This is a README file for the usage of Batmeth2.
 --------------------------------------------------
 
-BatMeth2 tutotial: https://batmeth2-docs.readthedocs.io
+BatMeth2 tutotial: https://batmeth2-mbw.readthedocs.io
 
 Starting from this version, because the matching problem needs to be modified for a long time, we replaced the matching part written by ourselves with MEM matching, and added some Python visualization functions. At present, some functions are being added.
 
