@@ -69,19 +69,19 @@ install: $(PROGS)
 OBJS= regression.o combine_pvals.o merge.o
 
 MOMO:
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o genome2cg genome2cg.cpp $(INCLUDEARGS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o genomebinLen genomebinLen.cpp $(INCLUDEARGS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o memalign memalign.cpp $(INCLUDEARGS) -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lpthread $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o build_index_rrbs build_index_rrbs.cpp $(INCLUDEARGS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) calmeth.cpp -o calmeth -m64 -I./bmtools/ -L./bmtools/ -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lBigWig -Wl,-rpath $(PWD)/bmtools
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) splitSam.cpp -o splitSam -m64 -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -pthread $(INCLUDEARGS) $(LIBS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o methyGff methyGff.cpp $(INCLUDEARGS) $(LIBS)
+	$(CXX) -o genome2cg genome2cg.cpp $(INCLUDEARGS) $(LIBS)
+	$(CXX) -o genomebinLen genomebinLen.cpp $(INCLUDEARGS) $(LIBS)
+	$(CXX) -o memalign memalign.cpp $(INCLUDEARGS) -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lpthread $(LIBS)
+	$(CXX) -o build_index_rrbs build_index_rrbs.cpp $(INCLUDEARGS) $(LIBS)
+	$(CXX) calmeth.cpp -o calmeth -m64 -I./bmtools/ -L./bmtools/ -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -lBigWig -Wl,-rpath $(PWD)/bmtools
+	$(CXX) splitSam.cpp -o splitSam -m64 -I./samtools-0.1.18/ -L./samtools-0.1.18/ -lbam -lz -pthread $(INCLUDEARGS) $(LIBS)
+	$(CXX) -o methyGff methyGff.cpp $(INCLUDEARGS) $(LIBS)
 
-%.o : %.cpp %.hpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $< $(INCLUDEARGS) $(LIBS)
+%.o : %.cpp
+	$(CXX) -c -o $@ $< $(INCLUDEARGS) $(LIBS)
 
 %: %.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@ $^ $(INCLUDEARGS) $(LIBS)
+	$(CXX) -o $@ $^ $(INCLUDEARGS) $(LIBS)
 
 clean:
 	@-rm -f $(PROGS) *.o *.so *.a *~ genome2cg genomebinLen memalign build_index_rrbs calmeth splitSam
