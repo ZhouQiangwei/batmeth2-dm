@@ -678,7 +678,6 @@ script:
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html 
 myinstall:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
-	cd src/bmtools && make install
 	g++ -o ./scripts/BatMeth2 ./scripts/BatMeth2.cpp -lpthread
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html
 	cp ./scripts/BatMeth2 ./bin/batmeth2

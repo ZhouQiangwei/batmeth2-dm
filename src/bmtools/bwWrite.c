@@ -189,7 +189,7 @@ int bwWriteHdr(bigWigFile_t *bw) {
     //
     uint16_t magic2 = BM_MAGIC;
     magic2 |= (uint16_t) bw->type;
-    if(DEBUG>1) printf("|||||| %ld\n", bw->type);
+    //if(DEBUG>1) printf("|||||| %ld\n", bw->type);
 
     uint16_t two = magic2; //4;
     FILE *fp;
@@ -1071,7 +1071,7 @@ int makeZoomLevels(bigWigFile_t *fp) {
         if(fp->cl->len[i] > maxZoom) maxZoom = fp->cl->len[i];
     }
     if(zoom > maxZoom) zoom = maxZoom;
-    fprintf(stderr, "\nzoom %ld %ld\n", zoom, maxZoom);
+    //fprintf(stderr, "\nzoom %ld %ld\n", zoom, maxZoom);
 
     for(i=0; i<fp->hdr->nLevels; i++) {
         if(zoom > maxZoom) break; //prevent absurdly large zoom levels
@@ -1267,7 +1267,7 @@ int constructZoomLevels(bigWigFile_t *fp) {
     if(!sum || !sumsq) goto error;
 
     for(i=0; i<fp->cl->nKeys; i++) {
-        if(DEBUG>1) printf("add Int ===zz-- %s %ld\n", fp->cl->chrom[i], fp->cl->len[i]);
+        //if(DEBUG>1) printf("add Int ===zz-- %s %ld\n", fp->cl->chrom[i], fp->cl->len[i]);
         it = bwOverlappingIntervalsIterator(fp, fp->cl->chrom[i], 0, fp->cl->len[i], 100000);
         if(!it) goto error;
         if(DEBUG>1) printf("add Int ===zxxz-- %d\n", it->intervals->l);

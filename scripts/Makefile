@@ -76,12 +76,12 @@ AUTOHEADER = ${SHELL} /public/home/qwzhou/software_devp/batmeth2-bwa/missing --r
 AUTOMAKE = ${SHELL} /public/home/qwzhou/software_devp/batmeth2-bwa/missing --run automake-1.11
 AWK = gawk
 CC = gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -I/public/home/qwzhou/software/packagesR/include
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H

@@ -105,12 +105,12 @@ AUTOHEADER = ${SHELL} /public/home/qwzhou/software_devp/batmeth2-bwa/missing --r
 AUTOMAKE = ${SHELL} /public/home/qwzhou/software_devp/batmeth2-bwa/missing --run automake-1.11
 AWK = gawk
 CC = gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -I/public/home/qwzhou/software/packagesR/include
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
@@ -678,7 +678,6 @@ script:
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html 
 myinstall:
 	if [ -d "bin" ]; then echo bin exists; else mkdir bin; fi
-	cd src/bmtools && make install
 	g++ -o ./scripts/BatMeth2 ./scripts/BatMeth2.cpp -lpthread
 	g++ ./scripts/report2html.cpp -o ./scripts/report2html
 	cp ./scripts/BatMeth2 ./bin/batmeth2
