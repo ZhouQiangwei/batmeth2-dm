@@ -170,7 +170,7 @@ void executeCMD(const char *cmd, string outputdir, string output_prefix)
     char ps[1024]={0};
     FILE *ptr;
     strcpy(ps, cmd);
-    fprintf(stderr, "[BatMeth2::calmeth] %s\n", cmd);
+    fprintf(stderr, "[BatMeth2::run] %s\n", cmd);
     if(output_prefix != "None" && output_prefix != ""){
 	    string filelogname = outputdir + output_prefix + ".cmd.log";
 	    FILE* flog = File_Open(filelogname.c_str(), "aw");
@@ -525,9 +525,9 @@ int main(int argc, char* argv[])
 	}
 
     if( mode != "index" && mode != "index_rrbs" ){
-        fprintf(stderr, "[ Program directory ] %s\n[ Program name ] %s\n",abspathtmp, processname);
-        fprintf(stderr, "[ Workdir ] %s\n", workdirtmp);
-        fprintf(stderr, "[ outputdir ] %s\n", outputdir.c_str());
+        fprintf(stderr, "[Program directory] %s\n[Program name] %s\n",abspathtmp, processname);
+        fprintf(stderr, "[Workdir] %s\n", workdirtmp);
+        fprintf(stderr, "[outputdir] %s\n", outputdir.c_str());
     }
 
 	if(configfile!="" && mode != "pipel"){
@@ -743,18 +743,18 @@ void bmtools_bodystats(string outputdir, string output_prefix){
     string cmd;
     if(gfffile != "None")
         if(GTF)
-            cmd = abspath + "bmtools bodystats" + " --gtf " + gfffile + " -i " + methratio + " -o " + output_prefix + ".bodym.txt";
+            cmd = abspath + "bmtools bodystats" + " --gtf " + gfffile + " -i " + methratio + " -o " + output_prefix;
         else
-            cmd = abspath + "bmtools bodystats" + " --gff " + gfffile + " -i " + methratio + " -o " + output_prefix + ".bodym.txt";
+            cmd = abspath + "bmtools bodystats" + " --gff " + gfffile + " -i " + methratio + " -o " + output_prefix;
     else if(bedfile != "None")
-        cmd = abspath + "bmtools bodystats" + " --bed " + bedfile + " -i " + methratio + " -o " + output_prefix + ".bodym.txt";
+        cmd = abspath + "bmtools bodystats" + " --bed " + bedfile + " -i " + methratio + " -o " + output_prefix;
     else {
     	fprintf(stderr, "\nWarning: not defined gtf/gff/bed file, so skip annatation.\n");
     	return;
     }
     if (distance != 2000)
         cmd = cmd + " --regionextend " + getstring(distance);
-    cmd = cmd + " --strand 3 --context 4";
+    cmd = cmd + " --strand 3 --context 4 --printcoverage 1";
     cmd = cmd + " >> " + outputdir + output_prefix + ".run.log 2>&1";
     executeCMD(cmd.c_str(), outputdir, output_prefix);
 }
@@ -1015,7 +1015,7 @@ void QCSingle(string outputdir, string input_prefix, string input_prefix1, strin
         string input_clean2;
         if(!cleanreads){
             if(infilelist.size() > 0) cleanname = getfilename(input_clean);
-            fprintf(stderr, "[ BMat ] raw reads: %s; clean reads: %s\n", infilelist[j].c_str(), cleanname.c_str());
+            fprintf(stderr, "[BatMeth2] raw reads: %s; clean reads: %s\n", infilelist[j].c_str(), cleanname.c_str());
             fastptrim(outputdir, output_prefix, input_prefix1, input_prefix2, infilelist[j], input_clean1, input_clean2, outputdir + cleanname, false);
             if(clean_input == ""){
                 clean_input = outputdir + cleanname;
@@ -1116,7 +1116,7 @@ void QCPaired(string outputdir, string input_prefix, string input_prefix1, strin
             exit(0);
         }
         if(!cleanreads) {
-            fprintf(stderr, "[ BMat ] raw reads: %s, %s; clean reads: %s, %s\n", infilelist1[j].c_str(), infilelist2[j].c_str(), input_clean1.c_str(), input_clean2.c_str());
+            fprintf(stderr, "[BatMeth2] raw reads: %s, %s; clean reads: %s, %s\n", infilelist1[j].c_str(), infilelist2[j].c_str(), input_clean1.c_str(), input_clean2.c_str());
             if(infilelist1.size() > 0) cleanname = input_clean1;
             fastptrim(outputdir, output_prefix, infilelist1[j], infilelist2[j], input_prefix, outputdir + input_clean1, outputdir + input_clean2, input_clean, true);
             if(clean_input1 == ""){
@@ -1147,12 +1147,12 @@ void alignment(string input_prefix1, string input_prefix2, string input_prefix, 
         
         // read qc and c2t / g2a
         if(input_prefix1!="" && input_prefix2!=""){
-            fprintf(stderr, "Process paired-end reads!\n");
+            fprintf(stderr, "[BatMeth2] Process paired-end reads!\n");
             QCPaired(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input1, clean_input2);
             // cleanfilelist1 cleanfilelist2
         }
         if(input_prefix!="None"){
-            fprintf(stderr, "Process single-end reads\n");
+            fprintf(stderr, "[BatMeth2] Process single-end reads\n");
             QCSingle(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input);
             // cleanfilelist
         }
@@ -1201,12 +1201,12 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
         
         // read qc and c2t / g2a
         if(input_prefix1!="" && input_prefix2!=""){
-            fprintf(stderr, "Process paired-end reads!\n");
+            fprintf(stderr, "[BatMeth2] Process paired-end reads!\n");
             QCPaired(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input1, clean_input2);
             // cleanfilelist1 cleanfilelist2
         }
         if(input_prefix!="None"){
-            fprintf(stderr, "Process single-end reads\n");
+            fprintf(stderr, "[BatMeth2] Process single-end reads\n");
             QCSingle(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input);
             // cleanfilelist
         }
@@ -1245,7 +1245,7 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
     fprintf(stderr, "[BatMeth2] Annotation ...\n");
     //annotation(outputdir, output_prefix);
     bmtools_profile(outputdir, output_prefix, 0); //body
-    bmtools_profile(outputdir, output_prefix+".tss", 1); //TSS
+    bmtools_profile(outputdir, output_prefix, 1); //TSS +".tss"
     bmtools_bodystats(outputdir, output_prefix);
     string methratioLogfile = outputdir + output_prefix + ".log.txt";
     string newlogfile = mkpath + output_prefix + ".methbasic.txt";
@@ -1263,7 +1263,7 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
     //mvpng(outputdir, mkpath, output_prefix);
     //printoutputfiles(outputdir, mkpath, output_prefix);
     //doc2html(outputdir, mkpath, output_prefix);
-    fprintf(stderr, "[BatMeth2] Done!\nBatMeth2 is a naive tools, if you meet any problems, please let us know. We will fix it asap!\nE-mail: qwzhou@mail.hzau.edu.cn\n");
+    fprintf(stderr, "[BatMeth2] Done!\nBatMeth2 is a naive tool, if you meet any problem, please let us know. We will fix it asap!\nE-mail: qwzhou@mail.hzau.edu.cn\n");
 }
 
 //"pipel", "index", "align", "calmeth", "anno", "visul", "diffmeth", "visuldiff", DManno"
