@@ -1,16 +1,18 @@
 BatMeth2: An Integrated Package for Bisulfite DNA Methylation Data Analysis with Indel-sensitive Mapping.  
 --------------------------------------------------
 
-This is a README file for the usage of Batmeth2.
+This is a README file for the usage of batmeth2.
 --------------------------------------------------
 
 BatMeth2 tutotial: https://batmeth2-mbw.readthedocs.io
 
-We privide a binary indexed mbw format, simalar to BigWig but with coverage and context information, for view and calculate DNA methylation level quickly. This file also can be used as BigWig file for genome browser visulization. Besides, mbw format file is smaller size than text format. Also, we provide a tool called bmtools for view and process mbw file. And bmDMR tool for detect DMC and DMR more faster based on mbw input files. for more information plase view https://batmeth2-mbw.readthedocs.io/en/latest/function/BMtools.html
+BatMeth2 is an easy-to-use, auto-run package for DNA methylation analyses, such as WGBS and RRBS.
+
+We privide a binary indexed mbw format in this version, similar to BigWig but with coverage and context information. mbw format can be used for view and calculate DNA methylation level of anny chromsome region quickly. This file also can be used as BigWig file for genome browser visulization. Besides, mbw format file has smaller size than text format. Also, we provide a tool named bmtools for view and process mbw file. And we also provide bmDMR tool instead of batDMR for detect DMC and DMR more faster based on mbw input files. For more information please view https://batmeth2-mbw.readthedocs.io/en/latest/function/BMtools.html
 
 REQUIREMENTS
 -------
-1) gcc (v4.8) , gsl library, zlib
+1) gcc (v4.8) , gsl library, zlib (https://batmeth2-mbw.readthedocs.io/en/latest/function/Requirements.html)
 
 2) samtools >= v1.3.1
 
@@ -22,7 +24,7 @@ a) Download 1)
 
 b) unzip 1) 
 
-c) Change directory into the top directory of b) "BatMeth2/" 
+c) Change directory into the top directory of b) "batmeth2/" 
 
 d) Type 
 
