@@ -52,14 +52,17 @@ void calregion_print(bigWigFile_t *fp, char* chrom, int start, int end, int spli
 void calregion_weighted_print(bigWigFile_t *fp, char* chrom, int start, int end, int splitN, char* method, int pstrand, int format, char* geneid, uint8_t context, char* bodycase, char* strand, FILE* outfileF_c, FILE* outfileF_cg, FILE* outfileF_chg, FILE* outfileF_chh, uint16_t *countC, uint16_t *countCT);
 int main_view_file(bigWigFile_t *ifp, char *bedfile, FILE* outfileF, char *outformat, bigWigFile_t *ofp);
 void mbwfileinit(bigWigFile_t *ofp, bigWigFile_t *ifp, char* outfile, int zoomlevel);
+void bwPrintHdr(bigWigFile_t *bw);
+void bwPrintIndexNode(bwRTreeNode_t *node, int level);
 
 #define MAX_LINE_PRINT 1000000
 #define MAX_BUFF_PRINT 20000000
 const char* Help_String_main="Command Format :  bmtools <mode> [opnions]\n"
 		"\nUsage:\n"
-        "\t  [mode]         mr2mbw view overlap regionstats bodystats profile chromstats\n\n"
+        "\t  [mode]         mr2mbw view viewheader overlap regionstats bodystats profile chromstats\n\n"
         "\t  mr2mbw         convert txt meth file to mbw format\n"
         "\t  view           mbw format to txt meth\n"
+        "\t  viewheader     view header of mbw file\n"
         "\t  overlap        overlap cytosine site with more than two mbw files\n"
         "\t  regionstats    calculate DNA methylation level of per region\n"
         "\t  bodystats      calculate DNA methylation level of body, upstream and downstream.\n"
@@ -102,6 +105,12 @@ const char* Help_String_view="Command Format :  bmtools view [opnions] -i meth.m
         "\t--context             [0/1/2/3] context for show, 0 represent 'C/ALL' context, 1 'CG' context, 2 'CHG' context, 3 'CHH' context.\n"
         "\t--mincover            >= minumum coverage show, default: 0\n"
         "\t--maxcover            <= maximum coverage show, default: 10000\n"
+		"\t-h|--help";
+
+const char* Help_String_viewheader="Command Format :  bmtools viewheader -i meth.mbw\n"
+		"\nUsage:\n"
+        "\t [view] mode paramaters, required\n"
+        "\t-i                    input mbigwig file\n"
 		"\t-h|--help";
 
 const char* Help_String_overlap="Command Format :  bmtools overlap [opnions] -i meth1.mbw -i2 meth2.mbw\n"
@@ -259,6 +268,8 @@ int main(int argc, char *argv[]) {
            fprintf(stderr, "%s\n", Help_String_mr2mbw); 
         }else if(strcmp(mode, "view") == 0){
            fprintf(stderr, "%s\n", Help_String_view); 
+        }else if(strcmp(mode, "viewheader") == 0){
+           fprintf(stderr, "%s\n", Help_String_viewheader); 
         }else if(strcmp(mode, "overlap") == 0){
            fprintf(stderr, "%s\n", Help_String_overlap); 
         }else if(strcmp(mode, "regionstats") == 0){
@@ -760,6 +771,19 @@ int main(int argc, char *argv[]) {
             bwClose(ofp);
             bwCleanup();
         }
+        return 0;
+    }
+
+    if(strcmp(mode, "viewheader")==0){
+        if(DEBUG>0) fprintf(stderr, "bm viewheader\n");
+        uint32_t type = BMtype(inbmfile, NULL);
+        bigWigFile_t *ifp = NULL;
+        ifp = bwOpen(inbmfile, NULL, "r");
+        ifp->type = ifp->hdr->version;
+        bwPrintHdr(ifp);
+        //bwPrintIndexTree(ifp);
+        free(inbmfile);
+        bwClose(ifp);
         return 0;
     }
 
@@ -3273,4 +3297,86 @@ FILE* File_Open(const char* File_Name,const char* Mode)
 		exit(1);
 	}
 	else return Handle;
+}
+
+void bwPrintHdr(bigWigFile_t *bw) {
+    uint64_t i;
+    int64_t i64;
+    //fprintf(stderr, "Version:    %"PRIu16"\n", bw->hdr->version);
+    if(bw->hdr->version & BM_END) fprintf(stderr, "BM_END:    yes\n");
+    else fprintf(stderr, "BM_END:    no\n");
+    if(bw->hdr->version & BM_COVER) fprintf(stderr, "BM_COVER:    yes\n");
+    else fprintf(stderr, "BM_COVER:    no\n");
+    if(bw->hdr->version & BM_CONTEXT) fprintf(stderr, "BM_CONTEXT:    yes\n");
+    else fprintf(stderr, "BM_CONTEXT:    no\n");
+    if(bw->hdr->version & BM_STRAND) fprintf(stderr, "BM_STRAND:    yes\n");
+    else fprintf(stderr, "BM_STRAND:    no\n");
+    if(bw->hdr->version & BM_ID) fprintf(stderr, "BM_ID:    yes\n");
+    else fprintf(stderr, "BM_ID:    no\n");
+    fprintf(stderr, "Levels:     %"PRIu16"\n", bw->hdr->nLevels);
+    //fprintf(stderr, "ctOffset:   0x%"PRIx64"\n", bw->hdr->ctOffset);
+    //fprintf(stderr, "dataOffset: 0x%"PRIx64"\n", bw->hdr->dataOffset);
+    fprintf(stderr, "indexOffset:        0x%"PRIx64"\n", bw->hdr->indexOffset);
+    //fprintf(stderr, "sqlOffset:  0x%"PRIx64"\n", bw->hdr->sqlOffset);
+    //fprintf(stderr, "summaryOffset:      0x%"PRIx64"\n", bw->hdr->summaryOffset);
+    fprintf(stderr, "bufSize:    %"PRIu32"\n", bw->hdr->bufSize);
+    fprintf(stderr, "extensionOffset:    0x%"PRIx64"\n", bw->hdr->extensionOffset);
+
+    if(bw->hdr->nLevels) {
+        fprintf(stderr, "	i	level	data	index\n");
+    }
+    for(i=0; i<bw->hdr->nLevels; i++) {
+        fprintf(stderr, "\t%"PRIu64"\t%"PRIu32"\t%"PRIx64"\t%"PRIx64"\n", i, bw->hdr->zoomHdrs->level[i], bw->hdr->zoomHdrs->dataOffset[i], bw->hdr->zoomHdrs->indexOffset[i]);
+    }
+
+    fprintf(stderr, "nBasesCovered:      %"PRIu64"\n", bw->hdr->nBasesCovered);
+    fprintf(stderr, "minVal:     %f\n", bw->hdr->minVal);
+    fprintf(stderr, "maxVal:     %f\n", bw->hdr->maxVal);
+    //fprintf(stderr, "sumData:    %f\n", bw->hdr->sumData);
+    //fprintf(stderr, "sumSquared: %f\n", bw->hdr->sumSquared);
+
+    //Chromosome idx/name/length
+    if(bw->cl) {
+        fprintf(stderr, "Chromosome List\n");
+        fprintf(stderr, "  idx\tChrom\tLength (bases)\n");
+        for(i64=0; i64<bw->cl->nKeys; i64++) {
+            fprintf(stderr, "  %"PRIu64"\t%s\t%"PRIu32"\n", i64, bw->cl->chrom[i64], bw->cl->len[i64]);
+        }
+    }
+}
+
+void bwPrintIndexNode(bwRTreeNode_t *node, int level) {
+    uint16_t i;
+    if(!node) return;
+    for(i=0; i<node->nChildren; i++) {
+        if(node->isLeaf) {
+            printf("  %i\t%"PRIu32"\t%"PRIu32"\t%"PRIu32"\t%"PRIu32"\t0x%"PRIx64"\t%"PRIu64"\n", level,\
+                node->chrIdxStart[i], \
+                node->baseStart[i], \
+                node->chrIdxEnd[i], \
+                node->baseEnd[i], \
+                node->dataOffset[i], \
+                node->x.size[i]);
+        } else {
+            printf("  %i\t%"PRIu32"\t%"PRIu32"\t%"PRIu32"\t%"PRIu32"\t0x%"PRIx64"\tNA\n", level,\
+                node->chrIdxStart[i], \
+                node->baseStart[i], \
+                node->chrIdxEnd[i], \
+                node->baseEnd[i], \
+                node->dataOffset[i]);
+            bwPrintIndexNode(node->x.child[i], level+1);
+        }
+    }
+}
+
+void bwPrintIndexTree(bigWigFile_t *fp) {
+    printf("\nIndex tree:\n");
+    printf("nItems:\t%"PRIu64"\n", fp->idx->nItems);
+    printf("chrIdxStart:\t%"PRIu32"\n", fp->idx->chrIdxStart);
+    printf("baseStart:\t%"PRIu32"\n", fp->idx->baseStart);
+    printf("chrIdxEnd:\t%"PRIu32"\n", fp->idx->chrIdxEnd);
+    printf("baseEnd:\t%"PRIu32"\n", fp->idx->baseEnd);
+    printf("idxSize:\t%"PRIu64"\n", fp->idx->idxSize);
+    printf("  level\tchrIdxStart\tbaseStart\tchrIdxEnd\tbaseEnd\tchild\tsize\n");
+    bwPrintIndexNode(fp->idx->root, 0);
 }
