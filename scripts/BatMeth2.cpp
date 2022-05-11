@@ -82,7 +82,7 @@ void usage(){
     //fprintf(stderr, "    --ap [24]                 When batch processing data, the number of samples to run at a time (default 4) * threads of each sample (default 6)\n");
     fprintf(stderr, "    -o [outprefix]            Name of output file prefix\n");
     fprintf(stderr, "    -O [out folder]           Output of result file to specified folder, default output to current folder (./)\n");
-    fprintf(stderr, "    -of [SAM/BAM]             Output format, default BAM.\n");
+    //fprintf(stderr, "    -of [SAM/BAM]             Output format, default BAM.\n");
     fprintf(stderr, "\n[alignment paramaters]\n");
     fprintf(stderr, "    -i    Name of input file, support .fq/.fastq and .gz/.gzip format. if paired-end. please use -1, -2\n");
     fprintf(stderr, "    -1    Name of input file left end, if single-end. please use -i\n");
@@ -116,6 +116,27 @@ void usage(){
     fprintf(stderr, "    see the details in 'BatMeth2 bmtools or bmtools'\n");
     fprintf(stderr, "\n[bmDMR paramaters:]\n");
     fprintf(stderr, "    see the details in 'BatMeth2 bmDMR or bmDMR'\n");
+
+    fprintf(stderr, "-h|--help   usage\n\nBatMeth2 is a naive tool, if you meet any problems or have good suggestion, please let us know. We will fix it asap!\nE-mail: qiangwei.zhou2013@gmail.com\n\n");
+}
+
+void usage_align(){
+    fprintf(stderr, "\nBatMeth2 [mode] [paramaters]\n");
+    fprintf(stderr, "mode:  align\n\n");
+    fprintf(stderr, "Example:\n   BatMeth2 align -g genome_indexed_by_batmeth2 -1 in1.fq.gz -2 in2.fq.gz -p 10 -o outprefix\n");
+    fprintf(stderr, "Or single-end:\n   BatMeth2 align -g genome_indexed_by_batmeth2 -i in.fq.gz -p 10 -o outprefix\n\n");
+
+    fprintf(stderr, "[fastp location]\n");
+    fprintf(stderr, "    --fastp    fastp program location.\n");
+    fprintf(stderr, "               ** If --fastp is not defined, the input file should be clean data.\n");
+    fprintf(stderr, "\n[alignment paramaters]\n");
+    fprintf(stderr, "    -i    Name of input file, support .fq/.fastq and .gz/.gzip format. if paired-end. please use -1, -2\n");
+    fprintf(stderr, "    -1    Name of input file left end, if single-end. please use -i\n");
+    fprintf(stderr, "    -2    Name of input file right end\n");
+    fprintf(stderr, "          -i/-1/-2 can be comma-separated lists (no whitespace), only supported in BatMeth2 aligner.\n");
+    fprintf(stderr, "    -g    Name of the genome mapped against, make sure build index first.\n");
+    fprintf(stderr, "    -p    Launch <integer> threads\n");
+    fprintf(stderr, "    -o    prefix of output file\n");
 
     fprintf(stderr, "-h|--help   usage\n\nBatMeth2 is a naive tool, if you meet any problems or have good suggestion, please let us know. We will fix it asap!\nE-mail: qiangwei.zhou2013@gmail.com\n\n");
 }
@@ -441,7 +462,8 @@ int main(int argc, char* argv[])
         else if(!strcmp(argv[i], "--bigwig"))
             printbigwig = true;
         else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help") || !strcmp(argv[i], "-help")){
-            usage();
+            fprintf(stderr, "%s\n", bt2modeHelp.c_str());
+            //usage();
             exit(0);
         }else if(!strcmp(argv[i], "-S")){
 			redss = argv[++i];
@@ -449,7 +471,8 @@ int main(int argc, char* argv[])
     }
 
 	if (argc < 2){
-	    usage();
+        fprintf(stderr, "%s\n", bt2modeHelp.c_str());
+	    //usage();
 	    exit(0);
 	}
 
@@ -457,7 +480,8 @@ int main(int argc, char* argv[])
     if(mode != "index" && mode != "index_rrbs" && mode != "pipel" && mode != "align" && mode != "calmeth" && mode != "bmtools" && mode != "methyPlot" && mode != "bmDMR" && 
     mode != "visul2sample" && mode != "DMCplot"){
     	fprintf(stderr, "\nNot a valid mode\n");
-    	usage();
+        fprintf(stderr, "%s\n", bt2modeHelp.c_str());
+    	//usage();
     	exit(0);
     }
     if(fastp!=""){
@@ -488,13 +512,18 @@ int main(int argc, char* argv[])
 
     if(mode == "align" && aligner == "BatMeth2"){
         if(argc < 4){ 
-            string cmd = abspath + "batmeth2-align";
-            executeCMD(cmd.c_str(), outputdir, output_prefix);
+            //string cmd = abspath + "batmeth2-align";
+            //executeCMD(cmd.c_str(), outputdir, output_prefix);
+            usage_align();
             exit(0);
         }
     }
     //for ann and bin file
     if(mode == "pipel" ){
+        if(argc < 4){ 
+            usage();
+            exit(0);
+        }
         if(genome_index == "" && genome_others != ""){
         	if(aligner == "BatMeth2"){
         		fprintf(stderr, "\nPlease defined genome_index location, when use batmeth2 aligner\n");
@@ -1312,7 +1341,8 @@ void detect_mode(string mode, int Nparas, char* paramaters[], string outputdir, 
         visul2sample();
     else{
         fprintf(stderr, "\ncan not detect any command mode!\n");
-        usage();
+        fprintf(stderr, "%s\n", bt2modeHelp.c_str());
+        //usage();
         exit(0);
     }
 }
