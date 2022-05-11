@@ -51,6 +51,39 @@ error:
     return NULL;
 }
 
+chromList_t *bwCreateChromList_ifp(bigWigFile_t *ifp) {
+    int64_t i = 0;
+    chromList_t *cl = calloc(1, sizeof(chromList_t));
+    if(!cl) return NULL;
+    int n = ifp->cl->nKeys;
+
+    cl->nKeys = n;
+    cl->chrom = malloc(sizeof(char*)*n);
+    cl->len = malloc(sizeof(uint32_t)*n);
+    if(!cl->chrom) goto error;
+    if(!cl->len) goto error;
+
+    for(i=0; i<n; i++) {
+        cl->len[i] = ifp->cl->len[i];
+        cl->chrom[i] = strdup(ifp->cl->chrom[i]);
+        if(!cl->chrom[i]) goto error;
+    }
+
+    return cl;
+
+error:
+    if(i) {
+        int64_t j;
+        for(j=0; j<i; j++) free(cl->chrom[j]);
+    }
+    if(cl) {
+        if(cl->chrom) free(cl->chrom);
+        if(cl->len) free(cl->len);
+        free(cl);
+    }
+    return NULL;
+}
+
 //If maxZooms == 0, then 0 is used (i.e., there are no zoom levels). If maxZooms < 0 or > 65535 then 10 is used.
 //TODO allow changing bufSize and blockSize
 int bwCreateHdr(bigWigFile_t *fp, int32_t maxZooms) {
@@ -390,7 +423,7 @@ int bwAddIntervals(bigWigFile_t *fp, char **chrom, uint32_t *start, uint32_t *en
 
     //Flush if needed
     if(wb->ltype != 1) if(flushBuffer(fp)) return 3;
-    if(DEBUG>1) printf("fp->hdr->bufSize %d %d\n", wb->l, fp->hdr->bufSize);
+    if(DEBUG>1) fprintf(stderr, "fp->hdr->bufSize %d %d\n", wb->l, fp->hdr->bufSize);
 
     if(wb->l+36 > fp->hdr->bufSize) if(flushBuffer(fp)) return 4;
     lastChrom = chrom[0];
