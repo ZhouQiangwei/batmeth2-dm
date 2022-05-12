@@ -61,6 +61,7 @@ string programname;
 
 string mrtext = "N";
 string skipalign = "N";
+string bmtools = "Y";
 
 void usage(){
     fprintf(stderr, "\nBatMeth2 [mode] [paramaters]\n");
@@ -100,7 +101,8 @@ void usage(){
     fprintf(stderr, "    --region    Bins for DMR calculate , default 1000bp .\n");
     fprintf(stderr, "    -f          for sam format outfile contain methState. [0 or 1], default: 0 (dont output this file).\n");
 	fprintf(stderr, "    -n          maximum mismatches allowed due to seq. default 0.1 percentage of the read length. [0-0.3]\n");
-    fprintf(stderr, "\n  --mrtext    also print txt format beside mbw, suggest no. [Y/N]\n");
+    fprintf(stderr, "\n  --mrtxt     [Y/N] also print txt format beside mbw.\n");
+    fprintf(stderr, "\n  --bmtools   [Y/N] use methyGff (methratio.txt) or bmtools (methratio.mbw) to calculate profile, suggest Y. [Y/N]\n");
     fprintf(stderr, "\n[calmeth or bmtools paramaters]\n");
     fprintf(stderr, "    --coverage    >= <INT> coverage. default:4\n");
     fprintf(stderr, "    --binCover    >= <INT> nCs per region. default:1\n");
@@ -262,7 +264,7 @@ void printparamter1(string mkpath, string input_prefix, string input_prefix1, st
         alignmode = "Paired-end";
         infiles = input_prefix1 + " || " + input_prefix2;
     }
-    if(skipalign != "Y") {
+    if(skipalign == "Y") {
         alignmode = "Skip align";
         infiles = "N";
     }
@@ -422,10 +424,12 @@ int main(int argc, char* argv[])
         else if(!strcmp(argv[i], "--gtf")){
             gfffile = argv[++i];
             GTF = true;
-        }else if(!strcmp(argv[i], "--mrtext")){
+        }else if(!strcmp(argv[i], "--mrtxt")){
             mrtext = argv[++i];
         }else if(!strcmp(argv[i], "--skipalign")){
             skipalign = argv[++i];
+        }else if(!strcmp(argv[i], "--bmtools")){
+            bmtools = argv[++i];
         }else if(!strcmp(argv[i], "--fastp")){
             fastp = argv[++i];
             cleanreads=false;
@@ -1271,7 +1275,7 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
     printparamter1(mkpath, input_prefix, input_prefix1, input_prefix2, outputdir, pairedend, output_prefix);
     printparamter2(mkpath, output_prefix);
     
-    if(skipalign == "Y")
+    if(skipalign != "Y")
         alignment(input_prefix1, input_prefix2, input_prefix, outputdir, output_prefix, pairedend);
     
     string align_result = outputdir + output_prefix + ".sort.bam";
@@ -1284,7 +1288,7 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
     align_result = outputdir + output_prefix + ".sort.bam";
     calmeth(align_result, outputdir, output_prefix);
     fprintf(stderr, "[BatMeth2] Annotation ...\n");
-    if(mrtext == "Y"){
+    if(bmtools == "N"){
         annotation(outputdir, output_prefix);
     }
     else{
