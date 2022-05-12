@@ -1580,7 +1580,8 @@ void *Process_read(void *arg)
 	string hits[MAX_HITS_ALLOWED];
 	char Comp_String[MAXTAG];for (int i=1;i<MAXTAG;Comp_String[i++]=0);
 	//start to read batman hit file
-	char *s2t = (char*) malloc(1000);
+	//char *s2t = (char*) malloc(1000);
+    char s2t[1000];
 	char read_Methyl_Info[600];char rawReadBeforeBS[600];char temp[5];
 	char Dummy[BATBUF],forReadString[BATBUF],Chrom[CHROMSIZE];
 	char Chrom_P[CHROMSIZE];int pos_P=0;int Insert_Size=0;int Qsingle=0; //Paired-end reads
@@ -1615,7 +1616,7 @@ void *Process_read(void *arg)
 			fileprocess = 0;
         }
 
-		if(s2t[0]=='@') 
+		if(!bamformat && s2t[0]=='@') 
 		{
 			continue;
 		}
@@ -1922,7 +1923,8 @@ void *Process_read(void *arg)
 			((ARGS *)arg)->Marked_GenomeE[pos+G_Skip+readString.size()] |= Flag_rm;
 		}
 	}
-	free(s2t);
+    fprintf(stderr, "close and free short mem\n");
+	//free(s2t);
 	fclose(fIS);
 }
 

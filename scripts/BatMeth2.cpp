@@ -59,6 +59,8 @@ string workdir;
 bool cleanreads=true;
 string programname;
 
+string mrtext = "N";
+
 void usage(){
     fprintf(stderr, "\nBatMeth2 [mode] [paramaters]\n");
     fprintf(stderr, "mode:  index, pipel, align, calmeth, bmtools, methyPlot, bmDMR, visul2sample, DMCplot\n\n");
@@ -96,6 +98,7 @@ void usage(){
     fprintf(stderr, "    --region    Bins for DMR calculate , default 1000bp .\n");
     fprintf(stderr, "    -f          for sam format outfile contain methState. [0 or 1], default: 0 (dont output this file).\n");
 	fprintf(stderr, "    -n          maximum mismatches allowed due to seq. default 0.1 percentage of the read length. [0-0.3]\n");
+    fprintf(stderr, "\n  --mrtext    also print txt format beside mbw, suggest no. [Y/N]\n");
     fprintf(stderr, "\n[calmeth or bmtools paramaters]\n");
     fprintf(stderr, "    --coverage    >= <INT> coverage. default:4\n");
     fprintf(stderr, "    --binCover    >= <INT> nCs per region. default:1\n");
@@ -413,6 +416,8 @@ int main(int argc, char* argv[])
         else if(!strcmp(argv[i], "--gtf")){
             gfffile = argv[++i];
             GTF = true;
+        }else if(!strcmp(argv[i], "--mrtext")){
+            mrtext = argv[++i];
         }else if(!strcmp(argv[i], "--fastp")){
             fastp = argv[++i];
             cleanreads=false;
@@ -671,6 +676,7 @@ void calmeth(string inputf, string outputdir, string output_prefix){
     if(region != 1000)
         cmd = cmd + " -R " + getstring(region);
     cmd = cmd + " -as 1 ";
+    if(mrtext == "Y") cmd = cmd + " --mrtxt ";
     cmd = cmd + " >> " + outputdir + output_prefix + ".run.log 2>&1";
     executeCMD(cmd.c_str(), outputdir, output_prefix);
     return;
@@ -966,12 +972,12 @@ void fastptrim(string outputdir, string output_prefix, string input_prefix1, str
     if(fastp != ""){
     	string cmd;
         if(pairedend)
-            cmd = fastp + " -Y 0 -i " + input_prefix1 + " -I " + input_prefix2 + " -o " + input_clean1 + " -O " + input_clean2 + " -h " + prefix + ".html" \
-                + " -j " + prefix + ".json";
+            cmd = fastp + " -Y 0 -i " + input_prefix1 + " -I " + input_prefix2 + " -o " + input_clean1 + " -O " + input_clean2 + " -h " + prefix + ".qc.html" \
+                + " -j " + prefix + ".qc.json";
         else
-        	cmd = fastp + " -Y 0 -i " + input_prefix + " -o " + input_clean + " -h " + prefix + ".html" \
-                + " -j " + prefix + ".json";
-        cmd = cmd + " >> " + outputdir + output_prefix + ".run.log 2>&1";
+        	cmd = fastp + " -Y 0 -i " + input_prefix + " -o " + input_clean + " -h " + prefix + ".qc.html" \
+                + " -j " + prefix + ".qc.json";
+        cmd = cmd + " > " + outputdir + output_prefix + ".run.log 2>&1";
         executeCMD(cmd.c_str(), outputdir, output_prefix);
     }
 }
@@ -1212,6 +1218,38 @@ void alignment(string input_prefix1, string input_prefix2, string input_prefix, 
     executeCMD(cmd.c_str(), outputdir, output_prefix);
 }
 
+void annotation(string outputdir, string output_prefix){
+    if(gfffile == "None")
+        return;
+    string methratio = outputdir + output_prefix + ".methratio.txt";
+    string cmd;
+    if(gfffile != "None")
+        if(GTF)
+            cmd = abspath + "methyGff" + " -o " + outputdir + output_prefix + " -G " + genome_index + " -gtf " + gfffile + " -m " + methratio + " -B -P --TSS --TTS --GENE -hs " + getstring(hs);
+        else
+            cmd = abspath + "methyGff" + " -o " + outputdir + output_prefix + " -G " + genome_index + " -gff " + gfffile + " -m " + methratio + " -B -P --TSS --TTS --GENE -hs " + getstring(hs);
+    else if(bedfile != "None")
+        cmd = abspath + "methyGff" + " -o " + outputdir + output_prefix + " -G " + genome_index + " -b " + bedfile + " -m " + methratio + " -B -P --TSS --TTS --GENE -hs "+ getstring(hs);
+    else {
+    	fprintf(stderr, "\nWarning: not defined gtf/gff/bed file, so skip annatation.\n");
+    	return;
+    }
+    if(step != 0.01)
+        cmd = cmd + " -s " + getstring(step);
+    if(chromstep != 50000)
+        cmd = cmd + " -S " + getstring(chromstep);
+    if (coverage != 4)
+        cmd = cmd + " -c " + getstring(coverage);
+    if (maxcoverage != 1000)
+        cmd = cmd + " -C " + getstring(maxcoverage);
+    if (binCover != 1)
+        cmd = cmd + " -nC " + getstring(binCover);
+    if (distance != 2000)
+        cmd = cmd + " -d " + getstring(distance);
+    cmd = cmd + " >> " + outputdir + output_prefix + ".run.log 2>&1";
+    executeCMD(cmd.c_str(), outputdir, output_prefix);
+}
+
 // whole pipeline for DNA methylation analysis. Contains alignment, calute meth level, DNA methylation annatation
 // on gff file or bed region, DNA methylation visulization. Differentail analysis use diffmeth function.
 
@@ -1272,11 +1310,15 @@ void runpipe(string outputdir, string output_prefix, string mkpath, string input
     align_result = outputdir + output_prefix + ".sort.bam";
     calmeth(align_result, outputdir, output_prefix);
     fprintf(stderr, "[BatMeth2] Annotation ...\n");
-    //annotation(outputdir, output_prefix);
-    bmtools_profile(outputdir, output_prefix, 0); //body
-    bmtools_profile(outputdir, output_prefix, 1); //TSS +".tss"
-    bmtools_bodystats(outputdir, output_prefix);
-    string methratioLogfile = outputdir + output_prefix + ".log.txt";
+    if(mrtext == "Y"){
+        annotation(outputdir, output_prefix);
+    }
+    else{
+        bmtools_profile(outputdir, output_prefix, 0); //body
+        bmtools_profile(outputdir, output_prefix, 1); //TSS +".tss"
+        bmtools_bodystats(outputdir, output_prefix);
+    }
+    string methratioLogfile = outputdir + output_prefix + ".methlog.txt";
     string newlogfile = mkpath + output_prefix + ".methbasic.txt";
     cmd = "cp ";
     cmd += methratioLogfile; cmd+=" ";
