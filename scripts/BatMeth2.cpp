@@ -60,6 +60,7 @@ bool cleanreads=true;
 string programname;
 
 string mrtext = "N";
+string skipalign = "N";
 
 void usage(){
     fprintf(stderr, "\nBatMeth2 [mode] [paramaters]\n");
@@ -92,6 +93,7 @@ void usage(){
     fprintf(stderr, "          -i/-1/-2 can be comma-separated lists (no whitespace), only supported in BatMeth2 aligner.\n");
     fprintf(stderr, "    -g    Name of the genome mapped against, make sure build index first.\n");
     fprintf(stderr, "    -p    Launch <integer> threads\n");
+    fprintf(stderr, "    --skipalign    [Y/N] Skip alignment, must have prefix.sort.bam file in out directory.\n");
     fprintf(stderr, "\n[calmeth paramaters]\n");
     fprintf(stderr, "    --Qual      calculate the methratio while read QulityScore >= Q. default:30\n");
     fprintf(stderr, "    --redup     REMOVE_DUP, 0 or 1, default 1\n");
@@ -260,6 +262,10 @@ void printparamter1(string mkpath, string input_prefix, string input_prefix1, st
         alignmode = "Paired-end";
         infiles = input_prefix1 + " || " + input_prefix2;
     }
+    if(skipalign != "Y") {
+        alignmode = "Skip align";
+        infiles = "N";
+    }
     string Sparamater = "Program\tBatMeth2.v1\nWorkdir\t" + workdir + "\noutputdir\t" + outputdir + "\nAligner\tBatMeth2-align\nGenome\t" + genome_index + 
     "\nAnnotation\t" + gfffile + "/" + bedfile + "\nOutput-prefix\t"+ output_prefix + "\nInput\t"+ infiles +  "\nAlignment-Mode\t" + alignmode;
     fprintf(Fparamater, "%s\n", Sparamater.c_str());
@@ -418,6 +424,8 @@ int main(int argc, char* argv[])
             GTF = true;
         }else if(!strcmp(argv[i], "--mrtext")){
             mrtext = argv[++i];
+        }else if(!strcmp(argv[i], "--skipalign")){
+            skipalign = argv[++i];
         }else if(!strcmp(argv[i], "--fastp")){
             fastp = argv[++i];
             cleanreads=false;
@@ -1256,52 +1264,18 @@ void annotation(string outputdir, string output_prefix){
 void runpipe(string outputdir, string output_prefix, string mkpath, string input_prefix, string input_prefix1, string input_prefix2, bool pairedend){
 	fprintf(stderr, "[BatMeth2] Genome: %s\n", genome_index.c_str());
 	fprintf(stderr, "[BatMeth2] Annotation, gtf: %s; bed: %s;\n", gfffile.c_str(), bedfile.c_str());
-	fprintf(stderr, "[BatMeth2] Input file:  %s, %s %s\n", input_prefix.c_str(), input_prefix1.c_str(), input_prefix2.c_str());
+	if(skipalign != "Y")
+        fprintf(stderr, "[BatMeth2] Input file:  %s, %s %s\n", input_prefix.c_str(), input_prefix1.c_str(), input_prefix2.c_str());
 	fprintf(stderr, "[BatMeth2] Outfile prefix: %s\n", output_prefix.c_str());
 
     printparamter1(mkpath, input_prefix, input_prefix1, input_prefix2, outputdir, pairedend, output_prefix);
     printparamter2(mkpath, output_prefix);
     
-    string clean_input1 = "", clean_input2 = "", clean_input = "";
-    if(fastp!=""){
-        fprintf(stderr, "[BatMeth2] Clean reads ...\n");
-        
-        // read qc and c2t / g2a
-        if(input_prefix1!="" && input_prefix2!=""){
-            fprintf(stderr, "[BatMeth2] Process paired-end reads!\n");
-            QCPaired(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input1, clean_input2);
-            // cleanfilelist1 cleanfilelist2
-        }
-        if(input_prefix!="None"){
-            fprintf(stderr, "[BatMeth2] Process single-end reads\n");
-            QCSingle(outputdir, input_prefix, input_prefix1, input_prefix2, output_prefix, clean_input);
-            // cleanfilelist
-        }
-    }
-
-    fprintf(stderr, "[BatMeth2] Alignment ...\n");
-    string align_result = outputdir + output_prefix + ".sort.bam";
-    string cmd = abspath + "memalign c2t";
-    if(fastp!=""){
-        if(pairedend){
-            cmd = cmd + " -1 " + clean_input1 + " -2 " + clean_input2;
-        }
-        if(input_prefix!="None"){
-            cmd = cmd + " -i " + clean_input;
-        }
-    }else{
-        if(pairedend){
-            cmd = cmd + " -1 " + input_prefix1 + " -2 " + input_prefix2;
-        }
-        if(input_prefix!="None"){
-            cmd = cmd + " -i " + input_prefix;
-        }
-    }
+    if(skipalign == "Y")
+        alignment(input_prefix1, input_prefix2, input_prefix, outputdir, output_prefix, pairedend);
     
-    cmd = cmd + " -o " + output_prefix; // + " -O " + outputdir; //for log outfile
-    cmd = cmd + " | " + abspath + "bwame mem -t " + getstring(threads) + " -C -p -Y " + genome_index + ".batmeth2.fa -  | " \
-      + "samtools sort -@ "+ getstring(threads) + " -o " + align_result + " - ";
-    executeCMD(cmd.c_str(), outputdir, output_prefix);
+    string align_result = outputdir + output_prefix + ".sort.bam";
+    string cmd = "";
 
     fprintf(stderr, "[BatMeth2] Alignment summary ...\n");
     fprintf(stderr, "[BatMeth2] Sorting align file ...\n");
