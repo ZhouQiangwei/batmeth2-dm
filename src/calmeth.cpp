@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
 		"\t-s|--step             Chrosome using an overlapping sliding window of 100000bp at a step of 50000bp. default step: 50000(bp)\n"
 		"\t-r|--remove_dup       REMOVE_DUP, default:false\n"
         "\t--zl                  The maximum number of zoom levels. [1-10], default: 2\n"
-		"\t-as [0/1]             If print calculated alignment reads in sam/bam file. default:0\n"
+		"\t-as [0/1]             If print calculated alignment reads in sam/bam file. default:1\n"
 		"\t-f|--sam              f for sam format outfile contain methState. default: sam format.\n"
 		"\t--sam-seq-beforeBS    Converting BS read to the genome sequences.\n"
 		"\t-h|--help";
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
 	
 //	int Par_Count=0;
 	std::string CMD;
-	int AlignSum = 0;
+	int AlignSum = 1;
 	uint32_t write_type = 0xf1ff; //0x8000;
 	int chrlenf = -1;
 	string chrsizefile;

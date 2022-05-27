@@ -102,7 +102,7 @@ void usage(){
     fprintf(stderr, "    -f          for sam format outfile contain methState. [0 or 1], default: 0 (dont output this file).\n");
 	fprintf(stderr, "    -n          maximum mismatches allowed due to seq. default 0.1 percentage of the read length. [0-0.3]\n");
     fprintf(stderr, "\n  --mrtxt     [Y/N] also print txt format beside mbw.\n");
-    fprintf(stderr, "\n  --bmtools   [Y/N] use methyGff (methratio.txt) or bmtools (methratio.mbw) to calculate profile, suggest Y. [Y/N]\n");
+    fprintf(stderr, "\n  --bmtools   [Y/N] use methyGff (methratio.txt) or bmtools (methratio.mbw) to calculate profile, suggest Y.\n");
     fprintf(stderr, "\n[calmeth or bmtools paramaters]\n");
     fprintf(stderr, "    --coverage    >= <INT> coverage. default:4\n");
     fprintf(stderr, "    --binCover    >= <INT> nCs per region. default:1\n");
@@ -757,11 +757,11 @@ void bmtools_profile(string outputdir, string output_prefix, int profilemode){
     string cmd;
     if(gfffile != "None")
         if(GTF)
-            cmd = abspath + "bmtools profile" + " --gtf " + gfffile + " -i " + methratio + " -o " + output_prefix + ".profile";
+            cmd = abspath + "bmtools profile" + " --gtf " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
         else
-            cmd = abspath + "bmtools profile" + " --gff " + gfffile + " -i " + methratio + " -o " + output_prefix + ".profile";
+            cmd = abspath + "bmtools profile" + " --gff " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
     else if(bedfile != "None")
-        cmd = abspath + "bmtools profile" + " --bed " + bedfile + " -i " + methratio + " -o " + output_prefix + ".profile";
+        cmd = abspath + "bmtools profile" + " --bed " + bedfile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
     else {
     	fprintf(stderr, "\nWarning: not defined gtf/gff/bed file, so skip annatation.\n");
     	return;
@@ -790,11 +790,11 @@ void bmtools_bodystats(string outputdir, string output_prefix){
     string cmd;
     if(gfffile != "None")
         if(GTF)
-            cmd = abspath + "bmtools bodystats" + " --gtf " + gfffile + " -i " + methratio + " -o " + output_prefix;
+            cmd = abspath + "bmtools bodystats" + " --gtf " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix;
         else
-            cmd = abspath + "bmtools bodystats" + " --gff " + gfffile + " -i " + methratio + " -o " + output_prefix;
+            cmd = abspath + "bmtools bodystats" + " --gff " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix;
     else if(bedfile != "None")
-        cmd = abspath + "bmtools bodystats" + " --bed " + bedfile + " -i " + methratio + " -o " + output_prefix;
+        cmd = abspath + "bmtools bodystats" + " --bed " + bedfile + " -i " + methratio + " -o " + outputdir + output_prefix;
     else {
     	fprintf(stderr, "\nWarning: not defined gtf/gff/bed file, so skip annatation.\n");
     	return;

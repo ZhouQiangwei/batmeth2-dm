@@ -1,4 +1,4 @@
-BatMeth2: An Integrated Package for Bisulfite DNA Methylation Data Analysis with Indel-sensitive Mapping.  
+BatMeth2: An Integrated Package for Bisulfite DNA Methylation Data Analysis.  
 --------------------------------------------------
 
 This is a README file for the usage of batmeth2.
