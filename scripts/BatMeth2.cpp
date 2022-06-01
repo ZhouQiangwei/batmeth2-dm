@@ -757,11 +757,11 @@ void bmtools_profile(string outputdir, string output_prefix, int profilemode){
     string cmd;
     if(gfffile != "None")
         if(GTF)
-            cmd = abspath + "bmtools profile" + " --gtf " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
+            cmd = abspath + "bmtools profile -p " + getstring(threads) + " --gtf " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
         else
-            cmd = abspath + "bmtools profile" + " --gff " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
+            cmd = abspath + "bmtools profile -p " + getstring(threads) + " --gff " + gfffile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
     else if(bedfile != "None")
-        cmd = abspath + "bmtools profile" + " --bed " + bedfile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
+        cmd = abspath + "bmtools profile -p " + getstring(threads) + " --bed " + bedfile + " -i " + methratio + " -o " + outputdir + output_prefix + ".profile";
     else {
     	fprintf(stderr, "\nWarning: not defined gtf/gff/bed file, so skip annatation.\n");
     	return;
