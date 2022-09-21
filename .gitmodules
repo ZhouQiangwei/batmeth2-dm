@@ -1,0 +1,3 @@
+[submodule "src/bmtools"]
+	path = src/bmtools
+	url = git@github.com:ZhouQiangwei/bmtools.git
