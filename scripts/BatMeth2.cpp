@@ -676,7 +676,7 @@ void calmeth(string inputf, string outputdir, string output_prefix){
     if(sammeth == 1)
         sammethfile =  " -f " + outputdir + output_prefix + ".md.sam";
     
-    string cmd = abspath + "calmeth" + " -g " + genome_index + " -n " + getstring(mismatches) + " -b " + inputf + " -m " + outputdir + output_prefix  + rd + sammethfile;
+    string cmd = abspath + "calmeth -C -S --Cx" + " -g " + genome_index + " -n " + getstring(mismatches) + " -b " + inputf + " -m " + outputdir + output_prefix  + rd + sammethfile;
     if(chromstep != 50000)
         cmd = cmd + " -s " + getstring(chromstep);
     if(coverage != 4)
